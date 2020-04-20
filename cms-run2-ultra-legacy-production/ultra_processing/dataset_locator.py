@@ -19,48 +19,60 @@ def get_root_file_names(dataset_name):
  
   ## Wait for date to terminate. Get return returncode ##
   p_status = p.wait()
-  print "Command output : ", output
-  print "Command exit status/return code : ", p_status
+  # print "Command output : ", output
+  # print "Command exit status/return code : ", p_status
 
   if (p_status == 0 and len(output) >= 1):
     cmd_dataset_path =  ['dasgoclient --query "file dataset=' + dataset_name + ' site=' + output.strip() + '" |head -1']
-    print cmd_dataset_path
+    # print cmd_dataset_path
     p = subprocess.Popen(cmd_dataset_path, stdout=subprocess.PIPE, shell=True)
     (output, err) = p.communicate()
     p_status = p.wait()
-    print "Command output : ", output
-    print "Command exit status/return code : ", p_status
+    # print "Command output : ", output
+    # print "Command exit status/return code : ", p_status
     return output
   else:
     print("We couldn't find files on the disk! No prov and lhc header dumped...")
     return None
   
 
-def dump_provenance_lhc(dataset_names):
+def dump_provenance_lhc(dataset_names, output_dir):
   locations = []
   cmd_dump_prov = "edmProvDump"
   for name in dataset_names:
+    print "- Getting file names..."
     location = get_root_file_names(name)
     if location is not None:
-      print(location)
+      # print(location)
       locations.append(location)
 
   for location in locations:
-    f_cmd_address = "cmsenv && " + cmd_dump_prov + " root://cms-xrd-global.cern.ch/" + location
+    # Extract filename by using the last part after "/" and by removing last 5 characters (".root")  
+    filename = location.split("/")[-1][:-6]
+
+    print "- Dumping 'prov/" + filename + ".dat'..."
+
+    # f_cmd_address = "cmsenv && " + cmd_dump_prov + " root://cms-xrd-global.cern.ch/" + location
+    f_cmd_address = cmd_dump_prov + " root://cms-xrd-global.cern.ch/" + location
     # f_cmd_address = "pwd"
-    print(f_cmd_address)
+    # print(f_cmd_address)
     # edmProvDump root://cms-xrd-global.cern.ch//store/mc/PhaseIIMTDTDRAutumn18GS/MinBias_TuneCP5_14TeV-pythia8/GEN-SIM/103X_upgrade2023_realistic_v2-v1/80000/B58CD7D3-E622-AB43-A613-25AB9AD01153.root
     cwd = os.path.dirname(os.path.realpath(__file__)) 
     p = subprocess.Popen(f_cmd_address, stdout=subprocess.PIPE, shell=True, cwd=cwd)
     (output, err) = p.communicate()
     p_status = p.wait()
-  
-    with open("file.dat","a+") as f:
-      f.write(output)
+
+    os.mkdir(os.path.join(output_dir, "prov"))
+
+    if p_status == 0:
+      with open(os.path.join(output_dir, "prov", filename + ".dat"), 'w') as (f):
+        f.write(output)
+    else:
+      print 'Error: ', p_status, ' - ', err
 
   
 
-dump_provenance_lhc(["/MinBias_TuneCP5_14TeV-pythia8/PhaseIIMTDTDRAutumn18GS-103X_upgrade2023_realistic_v2-v1/GEN-SIM", "/RSGluonToTT_M-3000_Tune4C_13TeV-pythia8/Fall13-POSTLS162_V1-v1/GEN-SIM"])
+# dump_provenance_lhc(["/MinBias_TuneCP5_14TeV-pythia8/PhaseIIMTDTDRAutumn18GS-103X_upgrade2023_realistic_v2-v1/GEN-SIM", "/RSGluonToTT_M-3000_Tune4C_13TeV-pythia8/Fall13-POSTLS162_V1-v1/GEN-SIM"])
 
 
 

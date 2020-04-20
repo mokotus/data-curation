@@ -187,7 +187,7 @@ class McM:
 
                 url = 'search/?db_name=%s&page=%d&%s' % (object_type, page, query)
                 res = self.__get(url)
-                print("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww")
+                # print("wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww")
                 if res:
                     return res["results"]
                 else:
@@ -271,7 +271,7 @@ class McM:
             url = '/mcm/' + url
 
         fullurl = 'https://' + self.server + "public/restapi/requests/get_setup/" + prep_id
-	print(fullurl)
+	# print(fullurl)
 
         if self.debug:
             print('GET |%s|' % (fullurl))
@@ -298,9 +298,10 @@ class McM:
         proc =  subprocess.Popen(stringCommand, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
            
         o, e = proc.communicate()
-        print('Output: ' + o.decode('ascii'))
-        print('Error: '  + e.decode('ascii'))
-        print('code: ' + str(proc.returncode))       
+        return o.decode('ascii')
+        # print('Output: ' + o.decode('ascii'))
+        # print('Error: '  + e.decode('ascii'))
+        # print('code: ' + str(proc.returncode))       
 
    
 
